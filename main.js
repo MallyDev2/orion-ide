@@ -20,7 +20,7 @@ let autoUpdater = null;
 try {
   autoUpdater = require("electron-updater").autoUpdater;
   autoUpdater.autoDownload = true;
-  autoUpdater.autoInstallOnAppQuit = true;
+  autoUpdater.autoInstallOnAppQuit = false;
 } catch {}
 
 const RUNTIME_CONFIG = {
@@ -222,7 +222,8 @@ app.whenReady().then(async () => {
         BrowserWindow.getAllWindows()[0]?.webContents.send("update-available");
       });
       autoUpdater.on("update-downloaded", () => {
-        BrowserWindow.getAllWindows()[0]?.webContents.send("update-downloaded");
+        // Install immediately and relaunch — no prompt needed
+        autoUpdater.quitAndInstall(true, true);
       });
       setTimeout(() => autoUpdater.checkForUpdates().catch(() => {}), 5000);
     } catch {}

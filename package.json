@@ -1,8 +1,8 @@
 {
   "name": "orion-ide",
-  "version": "0.4.0",
+  "version": "0.4.2",
   "private": true,
-  "description": "Orion IDE \u2014 AI-powered local desktop IDE",
+  "description": "Orion IDE — AI-powered local desktop IDE",
   "main": "main.js",
   "author": "MallyDev",
   "homepage": "https://mallydev.xyz",
@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "dotenv": "^16.4.5",
-    "electron-updater": "^6.3.9"
+    "electron-updater": "^6.8.3"
   },
   "build": {
     "appId": "xyz.mallydev.orionide",

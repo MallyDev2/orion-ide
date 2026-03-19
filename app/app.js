@@ -3385,11 +3385,17 @@ async function boot() {
   function showUpdateBanner(isReady) {
     const banner = document.getElementById("updateBanner");
     const restartBtn = document.getElementById("updateRestartBtn");
+    const dismissBtn = document.getElementById("updateDismissBtn");
     if (!banner) return;
     banner.classList.add("visible");
-    if (isReady && restartBtn) {
-      restartBtn.textContent = "Restart now";
-      restartBtn.style.fontWeight = "600";
+    if (isReady) {
+      // Update downloaded — will auto-install, just show status
+      banner.querySelector("span").textContent = "Update downloaded — restarting in a moment…";
+      if (restartBtn) restartBtn.style.display = "none";
+      if (dismissBtn) dismissBtn.style.display = "none";
+    } else {
+      banner.querySelector("span").textContent = "A new version of Orion IDE is downloading…";
+      if (restartBtn) restartBtn.style.display = "none";
     }
   }
 
