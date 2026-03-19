@@ -1,46 +1,33 @@
-<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <radialGradient id="bg" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(128 128) rotate(90) scale(128)">
-      <stop offset="0" stop-color="#0E1018"/>
-      <stop offset="0.65" stop-color="#080A11"/>
-      <stop offset="1" stop-color="#04060B"/>
-    </radialGradient>
-    <radialGradient id="glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(132 126) rotate(90) scale(78)">
-      <stop offset="0" stop-color="#FFF8EE" stop-opacity="0.24"/>
-      <stop offset="1" stop-color="#FFF8EE" stop-opacity="0"/>
-    </radialGradient>
-    <linearGradient id="ring" x1="65" y1="40" x2="190" y2="212" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#FFF4E3"/>
-      <stop offset="0.5" stop-color="#FFE3B8"/>
-      <stop offset="1" stop-color="#F6C985"/>
-    </linearGradient>
-    <filter id="softGlow" x="37" y="37" width="182" height="182" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-      <feGaussianBlur stdDeviation="7" result="blur"/>
-      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
-    </filter>
-  </defs>
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+  <rect width="200" height="200" fill="#080808" rx="24"/>
 
-  <rect width="256" height="256" rx="56" fill="url(#bg)"/>
-  <rect width="256" height="256" rx="56" fill="url(#glow)"/>
+  <g transform="translate(100,100)">
+    <!-- Main orbital arc — broken ring matching the photo -->
+    <path d="M 0 -72 A 72 72 0 1 1 -51 -51" fill="none" stroke="#c8bfa0" stroke-width="3" stroke-linecap="round"/>
+    <!-- Gap segment — dimmer -->
+    <path d="M -51 -51 A 72 72 0 0 1 -20 -69" fill="none" stroke="#c8bfa0" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
 
-  <g opacity="0.82">
-    <circle cx="42" cy="58" r="2" fill="#FFF7EB"/>
-    <circle cx="64" cy="92" r="1.6" fill="#FFF7EB"/>
-    <circle cx="191" cy="54" r="1.8" fill="#FFF7EB"/>
-    <circle cx="210" cy="86" r="2.2" fill="#FFF7EB"/>
-    <circle cx="198" cy="180" r="1.8" fill="#FFF7EB"/>
-    <circle cx="53" cy="185" r="1.6" fill="#FFF7EB"/>
-    <circle cx="98" cy="39" r="1.2" fill="#FFF7EB"/>
-    <circle cx="162" cy="208" r="1.3" fill="#FFF7EB"/>
+    <!-- Orbital trail streaks -->
+    <path d="M -90 30 Q -20 10 60 -60" fill="none" stroke="#9a9080" stroke-width="0.8" opacity="0.5"/>
+    <path d="M -100 50 Q -30 20 55 -70" fill="none" stroke="#9a9080" stroke-width="0.5" opacity="0.3"/>
+
+    <!-- Star nodes on trail -->
+    <circle cx="-82" cy="38" r="2.5" fill="#d4c8a8" opacity="0.7"/>
+    <circle cx="-60" cy="50" r="1.5" fill="#b8ae90" opacity="0.5"/>
+    <circle cx="50" cy="-62" r="2" fill="#d4c8a8" opacity="0.6"/>
+
+    <!-- Central star -->
+    <circle cx="0" cy="0" r="8" fill="#f0ead8"/>
+    <circle cx="0" cy="0" r="14" fill="none" stroke="#e8dfc0" stroke-width="0.6" opacity="0.4"/>
+    <line x1="-5" y1="0" x2="5" y2="0" stroke="#080808" stroke-width="1.2" stroke-linecap="round"/>
+    <line x1="0" y1="-5" x2="0" y2="5" stroke="#080808" stroke-width="1.2" stroke-linecap="round"/>
+
+    <!-- Background stars -->
+    <circle cx="40" cy="-55" r="1.2" fill="#b8b0a0" opacity="0.6"/>
+    <circle cx="-35" cy="60" r="1" fill="#a0988a" opacity="0.5"/>
+    <circle cx="65" cy="20" r="0.8" fill="#b8b0a0" opacity="0.4"/>
+    <circle cx="-65" cy="-20" r="1" fill="#c8c0b0" opacity="0.5"/>
+    <circle cx="20" cy="70" r="0.8" fill="#a8a098" opacity="0.4"/>
+    <circle cx="-20" cy="-68" r="1.4" fill="#d0c8b8" opacity="0.55"/>
   </g>
-
-  <g filter="url(#softGlow)">
-    <circle cx="128" cy="128" r="66" stroke="url(#ring)" stroke-width="9.5" stroke-linecap="round" stroke-dasharray="278 54"/>
-    <circle cx="128" cy="128" r="12" fill="#FFF4E3"/>
-  </g>
-
-  <path d="M59 171C90 187 126 194 170 191C196 189 214 183 224 177" stroke="url(#ring)" stroke-opacity="0.54" stroke-width="2.5" stroke-linecap="round"/>
-  <path d="M34 84C67 112 89 154 98 204" stroke="url(#ring)" stroke-opacity="0.24" stroke-width="2" stroke-linecap="round"/>
-  <path d="M182 74L202 61" stroke="#FFF4E3" stroke-width="3" stroke-linecap="round"/>
-  <circle cx="202" cy="61" r="3.4" fill="#FFF4E3"/>
 </svg>
