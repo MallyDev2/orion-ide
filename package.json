@@ -1,0 +1,85 @@
+{
+  "name": "orion-ide",
+  "version": "0.4.0",
+  "private": true,
+  "description": "Orion IDE \u2014 AI-powered local desktop IDE",
+  "main": "main.js",
+  "author": "MallyDev",
+  "homepage": "https://mallydev.xyz",
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron .",
+    "test": "node --test tests/**/*.test.js",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder --win nsis",
+    "dist:portable": "electron-builder --win portable",
+    "dist:dir": "electron-builder --win dir"
+  },
+  "devDependencies": {
+    "electron": "^37.1.0",
+    "electron-builder": "^26.0.12"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "electron-updater": "^6.3.9"
+  },
+  "build": {
+    "appId": "xyz.mallydev.orionide",
+    "productName": "Orion IDE",
+    "asar": true,
+    "compression": "normal",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "main/**/*",
+      "shared/**/*",
+      "app/**/*"
+    ],
+    "extraResources": [],
+    "publish": {
+      "provider": "github",
+      "owner": "Mallydev2",
+      "repo": "orion-ide",
+      "releaseType": "release"
+    },
+    "win": {
+      "signAndEditExecutable": false,
+      "artifactName": "Orion-IDE-Setup-${version}.${ext}",
+      "executableName": "OrionIDE",
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "app/assets/orion-icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "allowElevation": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Orion IDE",
+      "runAfterFinish": true,
+      "installerLanguages": [
+        "en_US"
+      ]
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "category": "public.app-category.developer-tools",
+      "icon": "app/assets/orion-icon.icns"
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "icon": "app/assets/orion-icon.png"
+    }
+  }
+}

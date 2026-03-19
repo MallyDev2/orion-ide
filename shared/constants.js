@@ -1,0 +1,45 @@
+"use strict";
+const IPC = {
+  CONFIG_GET:               "config:get",
+  APP_VERSION:              "app:version",
+  APP_UPDATE_CHECK:         "app:update-check",
+  WORKSPACE_CHOOSE:         "workspace:choose",
+  WORKSPACE_RELOAD:         "workspace:reload",
+  WORKSPACE_OPEN_FOLDER:    "workspace:open-folder",
+  WORKSPACE_GIT_STATUS:     "workspace:git-status",
+  WORKSPACE_GIT_DIFF:       "workspace:git-diff",
+  WORKSPACE_GIT_ACTION:     "workspace:git-action",
+  WORKSPACE_GIT_COMMIT:     "workspace:git-commit",
+  WORKSPACE_GIT_LOG:        "workspace:git-log",
+  WORKSPACE_GIT_BRANCHES:   "workspace:git-branches",
+  WORKSPACE_GIT_CHECKOUT:   "workspace:git-checkout",
+  WORKSPACE_GIT_CREATE_BRANCH: "workspace:git-create-branch",
+  WORKSPACE_WRITE:          "workspace:write-file",
+  WORKSPACE_CREATE:         "workspace:create-file",
+  WORKSPACE_MKDIR:          "workspace:create-folder",
+  WORKSPACE_RENAME:         "workspace:rename",
+  WORKSPACE_DELETE:         "workspace:delete",
+  TERMINAL_RUN:             "terminal:run",
+  SHELL_OPEN_PATH:          "shell:open-path",
+  PREVIEW_OPEN:             "preview:open",
+  LOG_ERROR:                "log:error",
+};
+
+const STORAGE = {
+  SESSION_CHAT:       "orion_chat_v2",
+  WORKSPACE_PATH:     "orion_workspace_v2",
+  LEFT_VIEW:          "orion_left_view_v2",
+  RIGHT_VIEW:         "orion_right_view_v2",
+  CONSOLE_COLLAPSED:  "orion_console_collapsed_v2",
+  PREFERENCES:        "orion_preferences_v2",
+  LEFT_SIZE:          "orion_left_size_v2",
+  RIGHT_SIZE:         "orion_right_size_v2",
+  DOCK_SIZE:          "orion_dock_size_v2",
+  EXPANDED_FOLDERS:   "orion_expanded_folders_v2",
+  COMMAND_HISTORY:    "orion_cmd_history_v2",
+  RECENT_WORKSPACES:  "orion_recent_workspaces_v2",
+  LEFT_COLLAPSED:     "orion_left_collapsed_v2",
+  RIGHT_COLLAPSED:    "orion_right_collapsed_v2",
+};
+
+module.exports = { IPC, STORAGE };

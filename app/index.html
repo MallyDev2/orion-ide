@@ -1,0 +1,630 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Orion IDE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/svg+xml" href="./assets/orion-mark.svg" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <!-- Update notification banner -->
+  <div class="update-banner" id="updateBanner">
+    <span>A new version of Orion IDE is ready.</span>
+    <button class="ghost-btn tiny" id="updateRestartBtn" type="button">Restart to update</button>
+    <button class="ghost-btn tiny" id="updateDismissBtn" type="button">Later</button>
+  </div>
+  <!-- Splash shown during Monaco boot -->
+  <div id="orion-splash" aria-hidden="true">
+    <img src="./assets/orion-mark.svg" alt="" class="splash-mark" />
+    <div class="splash-pulse"></div>
+  </div>
+
+  <div class="app-shell">
+
+    <!-- â”€â”€ TITLEBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <header class="titlebar">
+      <div class="titlebar-left">
+        <div class="brand-mark"><img src="./assets/orion-mark.svg" alt="Orion IDE" /></div>
+        <div class="titlebar-copy">
+          <strong>Orion IDE</strong>
+          <span id="missionLabel">Open a workspace and connect Orion</span>
+        </div>
+      </div>
+      <div class="titlebar-center">
+        <span id="missionHint">No workspace loaded</span>
+        <div class="titlebar-branch" id="gitBranchBadge" role="button" tabindex="0" title="Click to switch branch" style="cursor:pointer">
+          <span class="inline-label">Git</span>
+          <strong id="gitBranchLabel">No repo</strong>
+        </div>
+      </div>
+      <div class="titlebar-right">
+        <span class="top-meta"><span class="inline-label">State</span><strong id="sessionStat">Idle</strong></span>
+        <span class="top-meta"><span class="inline-label">Model</span><strong id="modelStat">Auto</strong></span>
+        <span class="top-meta" id="quotaStat" style="display:none"></span>
+        <button class="ghost-btn tiny" id="runWorkspaceBtn" title="Run project (Ctrl+Enter)" type="button">Run</button>
+        <button class="ghost-btn tiny" id="openTerminalBtn" title="Terminal (Ctrl+J)" type="button">Terminal</button>
+        <button class="ghost-btn tiny titlebar-icon-btn" id="commandPaletteBtn" title="Command Palette (Ctrl+P)" type="button">
+          <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="4" width="12" height="1.5" rx=".75" fill="currentColor"/><rect x="2" y="7.25" width="9" height="1.5" rx=".75" fill="currentColor"/><rect x="2" y="10.5" width="11" height="1.5" rx=".75" fill="currentColor"/></svg>
+        </button>
+        <button class="ghost-btn tiny titlebar-icon-btn" id="shortcutsBtn" title="Keyboard shortcuts (Ctrl+Shift+K)" type="button">?</button>
+        <button class="ghost-btn tiny" id="settingsOpenBtn" type="button">Settings</button>
+        <button class="ghost-btn tiny" id="authOpenBtn" type="button">Sign In</button>
+      </div>
+    </header>
+
+    <main class="workbench" id="workbench">
+
+      <!-- â”€â”€ ACTIVITY BAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+      <nav class="activity-bar" id="activityBar">
+        <div class="activity-top">
+          <button class="activity-btn active" data-activity="explorer" title="Explorer (Ctrl+B)" type="button">
+            <svg viewBox="0 0 20 20" fill="none"><path d="M3 5h6l2 2h6v10H3V5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          </button>
+          <button class="activity-btn" data-activity="search" title="Search" type="button">
+            <svg viewBox="0 0 20 20" fill="none"><circle cx="8.5" cy="8.5" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M14 14l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </button>
+          <button class="activity-btn" data-activity="changes" title="Source Control" type="button">
+            <svg viewBox="0 0 20 20" fill="none"><circle cx="5" cy="5" r="2" stroke="currentColor" stroke-width="1.5"/><circle cx="15" cy="15" r="2" stroke="currentColor" stroke-width="1.5"/><circle cx="15" cy="5" r="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 7v3a3 3 0 003 3h4M15 7v1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <span class="activity-badge" id="gitChangeBadge" hidden></span>
+          </button>
+          <button class="activity-btn" data-activity="project" title="Project Insights" type="button">
+            <svg viewBox="0 0 20 20" fill="none"><rect x="2" y="10" width="3" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="8.5" y="6" width="3" height="12" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="15" y="2" width="3" height="16" rx="1" stroke="currentColor" stroke-width="1.5"/></svg>
+          </button>
+          <button class="activity-btn" data-activity="health" title="Health Score" type="button">
+            <svg viewBox="0 0 20 20" fill="none"><path d="M10 16s-7-4.2-7-8a4 4 0 017-2.65A4 4 0 0117 8c0 3.8-7 8-7 8z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          </button>
+          <button class="activity-btn" data-activity="memory" title="Workspace Memory" type="button">
+            <svg viewBox="0 0 20 20" fill="none"><rect x="3" y="5" width="14" height="10" rx="3" stroke="currentColor" stroke-width="1.5"/><path d="M7 9h6M7 12h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          </button>
+          <button class="activity-btn" data-activity="symbols" title="Symbols (Ctrl+Shift+O)" type="button"><svg viewBox="0 0 20 20" fill="none"><path d="M4 5h12M4 10h8M4 15h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="15" cy="10" r="2" stroke="currentColor" stroke-width="1.3"/></svg></button>
+        </div>
+        <div class="activity-bottom">
+          <button class="activity-btn" data-activity="account" title="Account" type="button">
+            <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="7" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M3 17c0-3.3 3.1-6 7-6s7 2.7 7 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+      </nav>
+
+      <!-- â”€â”€ LEFT SIDEBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+      <aside class="sidebar" id="sidebar">
+        <div class="panel-header">
+          <strong id="leftPanelTitle">Explorer</strong>
+          <div class="panel-header-actions">
+            <button class="ghost-btn tiny" id="openWorkspaceBtn" type="button" title="Open workspace">Open</button>
+            <button class="ghost-btn tiny" id="refreshWorkspaceBtn" type="button" title="Refresh">Refresh</button>
+          </div>
+        </div>
+
+        <!-- Explorer -->
+        <section class="panel-view active" data-panel="explorer">
+          <div class="workspace-strip">
+            <strong id="workspacePath">No folder open</strong>
+            <span id="workspaceSummary">Choose a local project to start.</span>
+            <div class="workspace-meta-row">
+              <span class="workspace-badge" id="workspaceGitBadge">Git not connected</span>
+              <span class="workspace-badge" id="workspaceRecentLead">No recent workspaces yet</span>
+            </div>
+          </div>
+          <div class="inline-actions sidebar-actions">
+            <button class="ghost-btn tiny" id="newFileBtn" type="button">New File</button>
+            <button class="ghost-btn tiny" id="newFolderBtn" type="button">New Folder</button>
+          </div>
+          <input id="fileSearch" class="compact-input" type="search" placeholder="Search files... or #text for content" />
+          <div class="subline">
+            <span id="fileSearchMeta">0 indexed</span>
+            <span id="languageLead">No workspace</span>
+          </div>
+          <div class="sidebar-line compact" style="display:none">
+            <span id="focusLead">No active context</span>
+            <span id="workspaceHealth">Waiting for workspace</span>
+            <span id="workspaceHealthHint"></span>
+          </div>
+          <div class="recent-workspaces" id="recentWorkspacesPanel"></div>
+          <div class="tree" id="fileTree"></div>
+        </section>
+
+        <!-- Search -->
+        <section class="panel-view" data-panel="search">
+          <div class="workspace-strip">
+            <strong>Search</strong>
+            <span>Search across all files in the workspace.</span>
+          </div>
+          <input id="globalSearch" class="compact-input" type="search" placeholder="Search all files..." />
+          <div class="subline"><span id="globalSearchMeta">Enter at least 3 characters</span></div>
+          <div class="tree" id="globalSearchResults"></div>
+        </section>
+
+        <!-- Changes -->
+        <section class="panel-view" data-panel="changes">
+          <div class="workspace-strip">
+            <strong>Source Control</strong>
+            <span id="changesSummary">Open a git-backed workspace to inspect changes.</span>
+          </div>
+          <div class="section-block">
+            <div class="subline">
+              <span class="section-label">Working Tree</span>
+              <span id="changesLead">No repo</span>
+            </div>
+            <div class="inline-actions sidebar-actions">
+              <button class="ghost-btn tiny" id="stageAllBtn" type="button">Stage All</button>
+              <button class="ghost-btn tiny" id="unstageAllBtn" type="button">Unstage All</button>
+            </div>
+            <button class="primary-btn commit-btn" id="gitCommitBtn" type="button" hidden>Commit staged files</button>
+            <div class="changes-groups" id="changesGroups"></div>
+          </div>
+        </section>
+
+        <!-- Project -->
+        <section class="panel-view" data-panel="project">
+          <div class="info-list">
+            <div class="info-row"><span>Files</span><strong id="fileCount">0</strong></div>
+            <div class="info-row"><span>Lines</span><strong id="lineCount">0</strong></div>
+            <div class="info-row"><span>Languages</span><strong id="languageCount">0</strong></div>
+            <div class="info-row"><span>Tabs open</span><strong id="openTabsStat">0</strong></div>
+            <div class="info-row"><span>Disk</span><strong id="workspaceSyncStat">Idle</strong></div>
+          </div>
+          <div class="section-block">
+            <div class="subline"><span class="section-label">Language Mix</span><span id="activeFileName">None</span></div>
+            <div class="language-stack" id="languageBars"></div>
+          </div>
+          <div class="section-block">
+            <div class="subline"><span class="section-label">Project Radar</span><span id="projectTypeLead">No workspace</span></div>
+            <div class="insight-list" id="projectInsightList"></div>
+          </div>
+          <div class="section-block">
+            <div class="subline"><span class="section-label">Git Snapshot</span><span id="gitSummaryLead">No repo</span></div>
+            <div class="info-list compact" id="gitStatsPanel"></div>
+          </div>
+          <div class="section-block">
+            <div class="subline"><span class="section-label">Next Moves</span><span id="workspaceNextLead">Open a workspace</span></div>
+            <div class="recommendation-list" id="workspaceRecommendations"></div>
+          </div>
+          <!-- Hidden mirrors for legacy panel refs -->
+          <span id="gitFilesLead" style="display:none"></span>
+          <div id="gitChangedFiles" style="display:none"></div>
+        </section>
+
+        <!-- Health -->
+        <section class="panel-view" data-panel="health">
+          <div class="workspace-strip">
+            <strong>Codebase Health</strong>
+            <span>How well-structured is this project?</span>
+          </div>
+          <div id="healthPanel"></div>
+        </section>
+
+        <!-- Memory -->
+        <section class="panel-view" data-panel="memory">
+          <div class="workspace-strip">
+            <strong>Workspace Memory</strong>
+            <span>Decisions and conventions Orion always remembers for this project.</span>
+          </div>
+          <div id="memoryPanel"></div>
+        </section>
+
+        <!-- Symbols outline -->
+        <section class="panel-view" data-panel="symbols">
+          <div class="workspace-strip">
+            <strong>Symbols</strong>
+            <span id="symbolsFilename">No file open</span>
+          </div>
+          <div id="symbolsPanel" class="symbols-list"></div>
+        </section>
+
+        <!-- Account -->
+        <section class="panel-view" data-panel="account">
+          <div class="section-block">
+            <div class="account-row">
+              <div class="account-avatar" id="accountAvatar">O</div>
+              <div class="account-copy">
+                <strong id="accountName">Guest Operator</strong>
+                <span id="accountMeta">Sign in to sync your Orion role and backend access.</span>
+              </div>
+            </div>
+            <div class="info-list" style="margin-top:10px">
+              <div class="info-row"><span>Role</span><strong id="roleStat">Guest</strong></div>
+              <div class="info-row"><span>Current file</span><strong id="currentFileStat">None</strong></div>
+            </div>
+          </div>
+          <div class="section-block">
+            <div class="subline"><span class="section-label">Usage</span><span id="quotaLead">Awaiting account</span></div>
+            <div class="quota-bar"><span id="quotaPanelFill"></span></div>
+            <strong class="usage-copy" id="quotaPanelText">Waiting for sign-in</strong>
+          </div>
+          <div class="section-block">
+            <div class="subline"><span class="section-label">Quick Actions</span><span>Kick off Orion faster</span></div>
+            <div class="quick-grid" id="quickActionGrid"></div>
+          </div>
+          <div class="section-block">
+            <div class="subline"><span class="section-label">Preferences</span></div>
+            <div class="inline-actions sidebar-actions">
+              <button class="ghost-btn tiny" id="settingsPanelBtn" type="button">Settings</button>
+              <button class="ghost-btn tiny" id="openPreviewBtn" type="button">Preview</button>
+            </div>
+            <label class="settings-field" style="margin-top:10px">
+              <span>Auto-save</span>
+              <select id="autoSaveSelect" class="compact-input">
+                <option value="on">On (1.5s)</option>
+                <option value="off">Off</option>
+              </select>
+            </label>
+          </div>
+        </section>
+      </aside>
+
+      <div class="splitter splitter-left splitter-vertical" id="leftSplitter" aria-hidden="true"></div>
+
+      <!-- â”€â”€ EDITOR COLUMN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+      <section class="editor-column" id="editorColumn">
+
+        <!-- Breadcrumb -->
+        <div class="breadcrumb-bar" id="breadcrumbBar">
+          <span class="breadcrumb-empty" id="breadcrumbEmpty">No file selected</span>
+          <nav class="breadcrumb-nav" id="breadcrumbNav" aria-label="File path"></nav>
+        </div>
+
+        <div class="editor-toolbar">
+          <div class="editor-heading">
+            <strong id="editorTitle">No file selected</strong>
+            <span id="editorPath">No file selected</span>
+          </div>
+          <div class="inline-actions">
+            <div class="toolbar-group">
+              <button class="ghost-btn tiny" id="aiActionsBtn" type="button" title="AI actions (Explain, Review, Patch)">AI ▾</button>
+              <!-- hidden — kept for JS compatibility -->
+              <button style="display:none" id="explainSelectionBtn" type="button">Explain</button>
+              <button style="display:none" id="reviewFileBtn" type="button">Review</button>
+              <button style="display:none" id="patchFileBtn" type="button">Patch</button>
+              <button style="display:none" id="generateTestsBtn" type="button">Tests</button>
+            </div>
+            <div class="toolbar-group">
+              <button class="ghost-btn tiny" id="saveFileBtn" type="button" title="Save (Ctrl+S)">Save</button>
+              <button class="ghost-btn tiny" id="editorRunBtn" type="button" title="Run project (Ctrl+Enter)">Run</button>
+              <button class="ghost-btn tiny" id="editorTerminalBtn" type="button" title="Terminal (Ctrl+J)">Terminal</button>
+            </div>
+            <div class="completions-indicator" id="completionsIndicator" title="Inline completions" style="display:none">
+              <span class="completions-dot" id="completionsDot"></span>
+              <span id="completionsLabel">AI</span>
+            </div>
+            <div class="toolbar-group">
+              <button class="ghost-btn tiny" id="renameBtn" type="button" title="Rename file">Rename</button>
+              <button class="ghost-btn tiny" id="duplicateBtn" type="button" title="Duplicate file">Dupe</button>
+              <button class="ghost-btn tiny danger" id="deleteBtn" type="button" title="Delete file">Delete</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="meta-strip">
+          <span class="meta-pill clickable" id="editorLanguagePill" title="Language"><strong id="editorLanguage">Plain Text</strong></span>
+          <span class="meta-pill"><span class="inline-label">Lines</span><strong id="editorMetrics">0</strong></span>
+          <span class="meta-pill"><span class="inline-label">Ln/Col</span><strong id="editorSelection">—</strong></span>
+          <span class="meta-pill" id="editorEncodingPill" title="Encoding"><strong id="editorEncoding">UTF-8</strong></span>
+          <span class="meta-pill" id="editorLineEndingPill" title="Line endings"><strong id="editorLineEnding">LF</strong></span>
+          <span class="meta-pill autosave-indicator" id="autosaveIndicator" hidden>
+            <span class="autosave-dot"></span><span class="inline-label">Auto-save</span>
+          </span>
+        </div>
+
+        <div class="tabbar" id="tabbar"></div>
+
+        <div class="editor-stage">
+          <div class="editor-empty" id="editorEmpty">
+            <div class="empty-copy">
+              <div class="empty-mark"><img src="./assets/orion-mark.svg" alt="Orion mark" /></div>
+              <h2>Welcome to Orion IDE</h2>
+              <p>Open a local project and let Orion map your entire codebase — then ask it anything, patch files, commit changes, and ship faster.</p>
+              <div class="empty-actions">
+                <button class="primary-btn" id="emptyOpenBtn" type="button">Choose Workspace</button>
+                <button class="ghost-btn" id="emptyAuthBtn" type="button">Sign In</button>
+              </div>
+              <div class="empty-guide-grid" id="emptyGuideGrid"></div>
+              <div class="empty-recent" id="emptyRecentWorkspaces"></div>
+            </div>
+          </div>
+          <div id="editorMount"></div>
+        </div>
+      </section>
+
+      <div class="splitter splitter-right splitter-vertical" id="rightSplitter" aria-hidden="true"></div>
+
+      <!-- â”€â”€ ORION PANEL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+      <aside class="assistant-panel">
+        <div class="panel-header">
+          <strong id="rightPanelTitle">Chat</strong>
+          <div class="panel-switches">
+            <button class="ghost-btn tiny active" type="button" data-right-view="chat">Chat</button>
+            <button class="ghost-btn tiny" type="button" data-right-view="trace">Trace</button>
+            <button class="ghost-btn tiny" type="button" data-right-view="log">Log</button>
+          </div>
+        </div>
+
+        <!-- Chat -->
+        <section class="panel-view active" data-right-view-target="chat">
+          <div class="chat-feed" id="chatFeed"></div>
+          <div class="thinking-indicator" id="thinkingIndicator" hidden aria-live="polite">
+            <span class="thinking-dot"></span>
+            <span class="thinking-dot"></span>
+            <span class="thinking-dot"></span>
+            <span class="thinking-label">Orion is thinking...</span>
+          </div>
+          <!-- Smart prompt suggestions -->
+          <div class="prompt-suggestions" id="promptSuggestions"></div>
+          <form class="composer" id="chatForm">
+            <div class="composer-topline">
+              <span id="composerContext">No workspace loaded</span>
+              <div class="composer-toggles">
+                <label class="chip-toggle"><input id="searchToggle" type="checkbox" checked />Search</label>
+                <label class="chip-toggle"><input id="agentToggle" type="checkbox" checked />Agent</label>
+              </div>
+            </div>
+            <textarea id="chatInput" rows="4" placeholder="Ask Orion anything about your codebase..."></textarea>
+            <div class="composer-row">
+              <span id="composerHint">Open a project, pick a file, then tell Orion what you need.</span>
+              <div class="inline-actions">
+                <button class="ghost-btn tiny" id="clearChatBtn" type="button">New Chat</button>
+                <select id="modelPicker" class="model-picker compact-input" title="Select model" style="font-size:11px;padding:2px 4px;height:26px">
+                  <option value="auto">Auto</option>
+                  <option value="claude-haiku-4-5-20251001">Haiku</option>
+                  <option value="claude-sonnet-4-6">Sonnet</option>
+                  <option value="claude-opus-4-6">Opus</option>
+                </select>
+                <button class="ghost-btn tiny" id="voiceInputBtn" type="button" title="Voice input (click to speak)">&#127908;</button>
+                <button class="ghost-btn tiny" id="bugReportTriggerBtn" type="button" title="Report an issue">&#128030;</button>
+                <button class="primary-btn" type="submit">Send</button>
+              </div>
+            </div>
+          </form>
+        </section>
+
+        <!-- Trace -->
+        <section class="panel-view" data-right-view-target="trace">
+          <div class="trace-list" id="traceList"></div>
+          <div class="trace-footer" id="traceLead">Waiting for Orion activity</div>
+        </section>
+
+        <!-- Agent action log -->
+        <section class="panel-view" data-right-view-target="log">
+          <div class="panel-header-sub">
+            <span style="font-size:12px;color:var(--muted)">Agent actions this session — click ↩ to roll back any change</span>
+            <button class="ghost-btn tiny" id="clearActionLogBtn" type="button">Clear</button>
+          </div>
+          <div id="actionLogPanel" style="overflow-y:auto;flex:1;"></div>
+        </section>
+      </aside>
+
+      <div class="dock-resize-handle" id="dockResizeHandle" aria-hidden="true"></div>
+
+      <!-- â”€â”€ TERMINAL DOCK â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+      <div class="dock collapsed" id="consolePanel">
+        <div class="panel-header">
+          <strong>Terminal</strong>
+          <div class="panel-switches">
+            <button class="console-tab active" data-pane="terminal" type="button">Terminal</button>
+            <button class="console-tab" data-pane="trace" type="button">Log</button>
+            <button class="console-tab" data-pane="sources" type="button">Sources</button>
+            <button class="console-tab" data-pane="gitlog" type="button">Git Log</button>
+            <button class="ghost-btn tiny" id="clearConsoleBtn" type="button">Clear</button>
+            <button class="ghost-btn tiny" id="openPathBtn" type="button">Open Folder</button>
+            <button class="ghost-btn tiny" id="consoleCollapseBtn" type="button">Open Terminal</button>
+          </div>
+        </div>
+        <div class="dock-body">
+          <div class="command-runner">
+            <input id="commandInput" class="compact-input" type="text" placeholder="Run a command - e.g. npm test or git log --oneline" />
+            <button class="ghost-btn" id="runCommandBtn" type="button">Run</button>
+          </div>
+          <div class="console-panes">
+            <div class="console-pane active" id="terminalPane" data-pane="terminal"></div>
+            <div class="console-pane" id="tracePane" data-pane="trace"></div>
+            <div class="console-pane" id="sourcesPane" data-pane="sources"></div>
+          <div class="console-pane git-log-pane" id="gitLogPane" data-pane="gitlog"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- â”€â”€ STATUS BAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <footer class="statusbar">
+      <div class="statusbar-left">
+        <span class="statusbar-item" id="connectionStatus">
+          <span class="status-dot online" id="connectionDot"></span>
+          <span id="connectionLabel">Connected</span>
+        </span>
+        <span class="statusbar-item statusbar-git" id="statusBarGit" title="Git branch" style="display:none">
+          <svg viewBox="0 0 16 16" width="11" height="11" fill="none" style="margin-right:3px;vertical-align:middle"><path d="M5 3a2 2 0 110 2.83V7a2 2 0 002 2h2.17A2 2 0 1111 10.17V8.83A2 2 0 009 7H7V5.83A2 2 0 105 3z" fill="currentColor"/></svg>
+          <strong id="statusBarBranch">main</strong>
+          <span id="statusBarDirtyDot" style="display:none;margin-left:3px;color:#d08030">&#x25cf;</span>
+        </span>
+        <span class="statusbar-item clickable" id="statusBarSearch" title="Toggle search" tabindex="0">
+          <span class="inline-label">Search</span><strong id="searchStat">On</strong>
+        </span>
+        <span class="statusbar-item"><span class="inline-label">Focus</span><strong id="focusLeadMirror">No context</strong></span>
+      </div>
+      <div class="statusbar-right">
+        <span class="statusbar-item statusbar-errors" id="statusBarErrors" style="display:none" title="Errors/warnings">
+          <span id="statusBarErrorCount" style="color:#c04040">0</span>&#x2715;
+          <span id="statusBarWarnCount" style="color:#d08030">0</span>&#x26a0;
+        </span>
+        <span class="statusbar-item clickable" id="statusBarLanguage" title="File language">
+          <strong id="statusBarLang">Plain Text</strong>
+        </span>
+        <span class="statusbar-item" id="statusBarCursor" title="Line and column">
+          <strong id="statusBarLnCol">Ln 1, Col 1</strong>
+        </span>
+        <span class="statusbar-item"><span class="inline-label">Context</span><strong id="composerContextMirror">No workspace</strong></span>
+        <span class="statusbar-item"><span class="inline-label">Files</span><strong id="fileSearchMetaMirror">0</strong></span>
+        <span class="statusbar-item health-status-item" id="healthStatusItem" title="Codebase health score" style="display:none">
+          <span class="inline-label">Health</span><strong id="healthStatusScore">-</strong>
+        </span>
+      </div>
+    </footer>
+
+    <div class="toast-stack" id="toastStack" aria-live="polite" aria-atomic="true"></div>
+  </div>
+
+  <!-- â”€â”€ MODALS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+
+  <!-- Auth -->
+  <div class="modal-backdrop" id="authModal" aria-hidden="true">
+    <div class="auth-card">
+      <div class="auth-copy">
+        <span class="section-label">Orion Account</span>
+        <h2 id="authTitle">Sign in to Orion IDE</h2>
+        <p id="authSubtitle">Unlock your quota, role, and personalised backend access.</p>
+      </div>
+
+      <!-- GitHub OAuth -->
+      <button class="github-oauth-btn" id="githubOAuthBtn" type="button">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        Continue with GitHub
+      </button>
+
+      <div class="auth-divider"><span>or use email</span></div>
+
+      <!-- Auth mode tabs -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="authTabSignIn" type="button">Sign in</button>
+        <button class="auth-tab" id="authTabSignUp" type="button">Create account</button>
+        <button class="auth-tab" id="authTabReset" type="button">Forgot password</button>
+      </div>
+
+      <!-- Sign in form -->
+      <form id="authForm" class="auth-form" data-auth-mode="signin">
+        <input id="emailInput" class="compact-input" type="email" placeholder="Email" autocomplete="email" required />
+        <input id="passwordInput" class="compact-input" type="password" placeholder="Password" autocomplete="current-password" required />
+        <p class="auth-error" id="authError"></p>
+        <div class="auth-actions">
+          <button class="ghost-btn" id="cancelAuthBtn" type="button">Close</button>
+          <button class="primary-btn" id="authSubmitBtn" type="submit">Sign In</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Action (path input) -->
+  <div class="modal-backdrop" id="actionModal" aria-hidden="true">
+    <div class="auth-card action-card">
+      <div class="auth-copy">
+        <span class="section-label" id="actionLabel">Workspace Action</span>
+        <h2 id="actionTitle">Create file</h2>
+        <p id="actionDescription">Enter the path to create inside the current workspace.</p>
+      </div>
+      <form id="actionForm" class="auth-form">
+        <input id="actionInput" class="compact-input" type="text" placeholder="src/new-file.js" autocomplete="off" />
+        <p class="auth-error" id="actionError"></p>
+        <div class="auth-actions">
+          <button class="ghost-btn" id="cancelActionBtn" type="button">Cancel</button>
+          <button class="primary-btn" id="submitActionBtn" type="submit">Create</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Settings -->
+  <div class="modal-backdrop" id="settingsModal" aria-hidden="true">
+    <div class="auth-card settings-card">
+      <div class="auth-copy">
+        <span class="section-label">Orion IDE Settings</span>
+        <h2>Preferences</h2>
+        <p>Adjust editor, terminal, and Orion defaults for this install.</p>
+      </div>
+      <form id="settingsForm" class="auth-form settings-form">
+        <label class="settings-field"><span>Theme</span>
+          <select id="themeSelect" class="compact-input"><option value="light">Light</option><option value="dark">Dark</option></select>
+        </label>
+        <label class="settings-field"><span>Font size</span>
+          <input id="fontSizeInput" class="compact-input" type="number" min="11" max="22" step="1" />
+        </label>
+        <label class="settings-field"><span>Tab size</span>
+          <select id="tabSizeSelect" class="compact-input">
+            <option value="2">2 spaces</option>
+            <option value="4">4 spaces</option>
+            <option value="tab">Tab character</option>
+          </select>
+        </label>
+        <label class="settings-field"><span>Word wrap</span>
+          <select id="wordWrapSelect" class="compact-input"><option value="on">On</option><option value="off">Off</option><option value="bounded">Bounded</option></select>
+        </label>
+        <label class="settings-field"><span>Minimap</span>
+          <select id="minimapSelect" class="compact-input"><option value="off">Off</option><option value="on">On</option></select>
+        </label>
+        <label class="settings-field"><span>Auto-save</span>
+          <select id="autoSaveSettingSelect" class="compact-input"><option value="on">On</option><option value="off">Off</option></select>
+        </label>
+        <label class="settings-field"><span>Default search</span>
+          <select id="defaultSearchSelect" class="compact-input"><option value="on">On</option><option value="off">Off</option></select>
+        </label>
+        <label class="settings-field"><span>Default Orion mode</span>
+          <select id="defaultAgentSelect" class="compact-input"><option value="agent">Agent</option><option value="chat">Chat</option></select>
+        </label>
+        <label class="settings-field"><span>Inline completions</span>
+          <select id="completionsSelect" class="compact-input"><option value="on">On (ghost-text)</option><option value="off">Off</option></select>
+        </label>
+        <p class="auth-error" id="settingsError"></p>
+        <div class="auth-actions">
+          <button class="ghost-btn" id="cancelSettingsBtn" type="button">Close</button>
+          <button class="primary-btn" id="saveSettingsBtn" type="submit">Save Settings</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Command palette -->
+  <div class="modal-backdrop" id="commandPaletteModal" aria-hidden="true">
+    <div class="auth-card command-palette-card">
+      <div class="command-palette-shell">
+        <input id="commandPaletteInput" class="compact-input command-palette-input" type="search" placeholder="Search commands, files, @symbols, #content..." autocomplete="off" />
+        <div class="command-palette-list" id="commandPaletteList"></div>
+      </div>
+      <div class="auth-actions">
+        <span class="command-palette-hint">Up/Down navigate | Enter run | Esc close | @symbol | #content</span>
+        <button class="ghost-btn" id="closeCommandPaletteBtn" type="button">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Patch preview -->
+  <div class="modal-backdrop" id="patchPreviewModal" aria-hidden="true">
+    <div class="auth-card command-palette-card">
+      <div class="auth-copy">
+        <span class="section-label">Orion Patch Review</span>
+        <h2 id="patchPreviewTitle">Review generated changes</h2>
+        <p id="patchPreviewSummary">Orion prepared file updates for your approval.</p>
+      </div>
+      <div class="command-palette-shell">
+        <div class="command-palette-list" id="patchPreviewList"></div>
+        <div id="diffEditorPane" hidden style="display:none;flex-direction:column;flex:1;min-height:320px;margin-top:8px;border:0.5px solid var(--line);border-radius:8px;overflow:hidden">
+          <div style="padding:6px 12px;font-size:11px;color:var(--muted);border-bottom:0.5px solid var(--line);display:flex;align-items:center;gap:8px">
+            <span id="diffEditorTitle">Diff</span>
+            <button class="ghost-btn tiny" id="closeDiffBtn" type="button" style="margin-left:auto">Close diff</button>
+          </div>
+          <div id="diffEditorMount" style="flex:1;min-height:280px"></div>
+        </div>
+      </div>
+      <div class="auth-actions">
+        <span class="command-palette-hint">Up/Down navigate | Enter run | Esc close | @symbol | #content</span>
+        <button class="ghost-btn" id="closePatchPreviewBtn" type="button">Close</button>
+        <button class="ghost-btn danger" id="discardPatchBtn" type="button">Discard</button>
+        <button class="primary-btn" id="applyPatchBtn" type="button">Apply Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shortcuts -->
+  <div class="modal-backdrop" id="shortcutsModal" aria-hidden="true">
+    <!-- injected by shortcuts.js -->
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/loader.js"></script>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
+
